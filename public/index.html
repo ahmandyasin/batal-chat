@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Anonymous private text chat with real people">
+  <meta name="color-scheme" content="dark light">
+  <title>Batal — Anonymous Chat</title>
+  <script>
+    (function () {
+      if (localStorage.getItem('batal-theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+      if (localStorage.getItem('batal-lang') === 'ku') {
+        document.documentElement.setAttribute('lang', 'ku');
+        document.documentElement.setAttribute('dir', 'rtl');
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="page-landing">
+  <button type="button" class="corner-toggle theme-toggle" data-theme-toggle aria-label="Switch to light mode">
+    <span class="corner-toggle__ring" aria-hidden="true"></span>
+    <span class="corner-toggle__inner">
+      <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke-linecap="round"/>
+      </svg>
+      <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+        <path d="M21 14.5A8.5 8.5 0 1111.5 4 7 7 0 0021 14.5z" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+  </button>
+
+  <button type="button" class="corner-toggle lang-toggle" data-lang-toggle aria-pressed="false" autocomplete="off" aria-labelledby="langToggleSr">
+    <span class="visually-hidden" data-lang-sr id="langToggleSr">Kurdish</span>
+    <span class="corner-toggle__ring" aria-hidden="true"></span>
+    <span class="corner-toggle__inner" aria-hidden="true">
+      <svg class="lang-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M3 12h18M12 3c2.5 2.8 4 6 4 9s-1.5 6.2-4 9M12 3c-2.5 2.8-4 6-4 9s1.5 6.2 4 9" stroke-linecap="round"/>
+      </svg>
+      <span class="lang-toggle__label">KU</span>
+    </span>
+  </button>
+
+  <main class="landing">
+    <header class="landing__header">
+      <h1 class="landing__title" data-i18n="title">Batal</h1>
+      <p class="landing__online" id="onlineCount" aria-live="polite">
+        <span class="landing__online-dot" aria-hidden="true">●</span>
+        <span class="landing__online-text">— online</span>
+      </p>
+    </header>
+
+    <section class="landing__body">
+      <div class="landing__shield" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2L4 6v6c0 5.25 3.4 10.15 8 11.35C16.6 22.15 20 17.25 20 12V6l-8-4z"/>
+          <path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <p class="landing__security" data-i18n="privacy">
+        Your identity and messages are fully private and protected
+      </p>
+    </section>
+
+    <footer class="landing__footer">
+      <a href="/chat.html" class="btn btn--primary btn--large" data-i18n="startChat">Start Chat</a>
+      <p class="landing__developer" data-i18n="developer">Developer: Ravand Samir</p>
+    </footer>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/lang.js"></script>
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

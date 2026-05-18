@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Anonymous private text chat">
+  <meta name="color-scheme" content="dark light">
+  <title>Batal — Chat</title>
+  <script>
+    (function () {
+      if (localStorage.getItem('batal-theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+      if (localStorage.getItem('batal-lang') === 'ku') {
+        document.documentElement.setAttribute('lang', 'ku');
+        document.documentElement.setAttribute('dir', 'rtl');
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="page-chat">
+  <button type="button" class="corner-toggle theme-toggle" data-theme-toggle aria-label="Switch to light mode">
+    <span class="corner-toggle__ring" aria-hidden="true"></span>
+    <span class="corner-toggle__inner">
+      <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke-linecap="round"/>
+      </svg>
+      <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+        <path d="M21 14.5A8.5 8.5 0 1111.5 4 7 7 0 0021 14.5z" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+  </button>
+
+  <button type="button" class="corner-toggle lang-toggle" data-lang-toggle aria-pressed="false" autocomplete="off" aria-labelledby="langToggleSr">
+    <span class="visually-hidden" data-lang-sr id="langToggleSr">Kurdish</span>
+    <span class="corner-toggle__ring" aria-hidden="true"></span>
+    <span class="corner-toggle__inner" aria-hidden="true">
+      <svg class="lang-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M3 12h18M12 3c2.5 2.8 4 6 4 9s-1.5 6.2-4 9M12 3c-2.5 2.8-4 6-4 9s1.5 6.2 4 9" stroke-linecap="round"/>
+      </svg>
+      <span class="lang-toggle__label">KU</span>
+    </span>
+  </button>
+
+  <div class="chat-app" id="chatApp">
+    <header class="chat-header">
+      <a href="/" class="chat-header__back" id="leaveBtn" data-i18n-aria="leaveChat" aria-label="Leave chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <h1 class="chat-header__title" data-i18n="title">Batal</h1>
+      <span class="chat-header__status" id="connectionStatus" hidden></span>
+    </header>
+
+    <section class="chat-status" id="statusPanel">
+      <div class="status-card" id="statusCard">
+        <div class="status-card__spinner" id="statusSpinner" aria-hidden="true"></div>
+        <p class="status-card__text status-card__text--searching" id="statusText">
+          <span class="searching-message">Searching for a partner...</span>
+        </p>
+        <button type="button" class="btn btn--secondary" id="findAgainBtn" data-i18n="findNewPartner" hidden>Find new partner</button>
+      </div>
+    </section>
+
+    <section class="chat-main" id="chatMain" hidden>
+      <div class="messages" id="messages" role="log" aria-live="polite" aria-label="Chat messages"></div>
+    </section>
+
+    <footer class="chat-input-bar" id="chatInputBar" hidden>
+      <form class="chat-form" id="chatForm">
+        <label for="messageInput" class="visually-hidden" data-i18n="messageLabel">Message</label>
+        <input
+          type="text"
+          id="messageInput"
+          class="chat-form__input"
+          data-i18n-placeholder="messagePlaceholder"
+          placeholder="Type a message…"
+          autocomplete="off"
+          maxlength="2000"
+        >
+        <button type="submit" class="chat-form__send" data-i18n-aria="sendMessage" aria-label="Send message">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </form>
+    </footer>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/lang.js"></script>
+  <script src="/js/theme.js"></script>
+  <script src="/js/chat.js"></script>
+</body>
+</html>
