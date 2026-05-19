@@ -6,6 +6,9 @@
   const findAgainBtn = document.getElementById('findAgainBtn');
   const chatMain = document.getElementById('chatMain');
   const chatInputBar = document.getElementById('chatInputBar');
+  const chatIdentity = document.getElementById('chatIdentity');
+  const yourNameEl = document.getElementById('yourNameEl');
+  const partnerNameEl = document.getElementById('partnerNameEl');
   const messagesEl = document.getElementById('messages');
   const chatForm = document.getElementById('chatForm');
   const messageInput = document.getElementById('messageInput');
@@ -15,9 +18,21 @@
   let isMatched = false;
   let uiState = 'connecting';
   let disconnectKey = 'partnerLeft';
+  let yourNumber = null;
+  let partnerNumber = null;
 
   function t(key) {
     return window.BatalLang ? window.BatalLang.t(key) : key;
+  }
+
+  function parseMatchNumber(value) {
+    const n = Number(value);
+    return Number.isFinite(n) && n > 0 ? Math.floor(n) : null;
+  }
+
+  function anonymousName(number) {
+    if (number === null || number === undefined) return '—';
+    return t('anonymousName').replace('{n}', String(number));
   }
 
   function setHeaderStatus(key, className) {
@@ -35,6 +50,12 @@
     }
   }
 
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
   function setSearchingMessage() {
     if (!statusText) return;
     statusText.className = 'status-card__text status-card__text--searching';
@@ -44,46 +65,111 @@
       '</span>';
   }
 
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+  function hideWaitingUI() {
+    document.body.classList.remove('is-waiting');
+    document.body.classList.add('is-matched');
+
+    if (statusPanel) {
+      statusPanel.hidden = true;
+      statusPanel.classList.add('is-hidden');
+      statusPanel.setAttribute('aria-hidden', 'true');
+    }
+    if (statusSpinner) {
+      statusSpinner.classList.add('is-hidden');
+      statusSpinner.style.animation = 'none';
+    }
+    if (statusText) {
+      statusText.className = 'status-card__text';
+      statusText.innerHTML = '';
+      statusText.textContent = '';
+    }
   }
 
   function showWaitingUI() {
+    if (isMatched) return;
+
     isMatched = false;
+    yourNumber = null;
+    partnerNumber = null;
     uiState = 'waiting';
-    statusPanel.hidden = false;
-    chatMain.hidden = true;
-    chatInputBar.hidden = true;
-    statusSpinner.classList.remove('is-hidden');
+
+    document.body.classList.add('is-waiting');
+    document.body.classList.remove('is-matched');
+
+    if (chatIdentity) chatIdentity.hidden = true;
+    if (chatMain) chatMain.hidden = true;
+    if (chatInputBar) chatInputBar.hidden = true;
+
+    if (statusPanel) {
+      statusPanel.hidden = false;
+      statusPanel.classList.remove('is-hidden');
+      statusPanel.removeAttribute('aria-hidden');
+    }
+    if (statusSpinner) {
+      statusSpinner.classList.remove('is-hidden');
+      statusSpinner.style.animation = '';
+    }
+
     setSearchingMessage();
-    findAgainBtn.hidden = true;
+    if (findAgainBtn) findAgainBtn.hidden = true;
     setHeaderStatus('', '');
   }
 
   function showDisconnectedUI(messageKey) {
     disconnectKey = messageKey;
     isMatched = false;
+    yourNumber = null;
+    partnerNumber = null;
     uiState = 'disconnected';
-    statusPanel.hidden = false;
-    chatMain.hidden = true;
-    chatInputBar.hidden = true;
-    statusSpinner.classList.add('is-hidden');
-    statusText.className = 'status-card__text';
-    statusText.textContent = t(messageKey);
-    findAgainBtn.hidden = false;
+
+    document.body.classList.remove('is-waiting', 'is-matched');
+
+    if (chatIdentity) chatIdentity.hidden = true;
+    if (chatMain) chatMain.hidden = true;
+    if (chatInputBar) chatInputBar.hidden = true;
+
+    if (statusPanel) {
+      statusPanel.hidden = false;
+      statusPanel.classList.remove('is-hidden');
+      statusPanel.removeAttribute('aria-hidden');
+    }
+    if (statusSpinner) statusSpinner.classList.add('is-hidden');
+    if (statusText) {
+      statusText.className = 'status-card__text';
+      statusText.innerHTML = '';
+      statusText.textContent = t(messageKey);
+    }
+    if (findAgainBtn) findAgainBtn.hidden = false;
     setHeaderStatus('disconnected', 'is-error');
   }
 
-  function showChatUI() {
+  function updateIdentityDisplay() {
+    if (yourNameEl) yourNameEl.textContent = anonymousName(yourNumber);
+    if (partnerNameEl) partnerNameEl.textContent = anonymousName(partnerNumber);
+    if (chatIdentity) chatIdentity.hidden = false;
+  }
+
+  function showChatUI(matchData) {
+    const parsedYou = parseMatchNumber(matchData && matchData.yourNumber);
+    const parsedPartner = parseMatchNumber(matchData && matchData.partnerNumber);
+
+    if (parsedYou !== null) yourNumber = parsedYou;
+    if (parsedPartner !== null) partnerNumber = parsedPartner;
+
     isMatched = true;
     uiState = 'matched';
-    statusPanel.hidden = true;
-    chatMain.hidden = false;
-    chatInputBar.hidden = false;
+
+    hideWaitingUI();
+
+    if (chatMain) chatMain.hidden = false;
+    if (chatInputBar) chatInputBar.hidden = false;
+
+    updateIdentityDisplay();
+
     messagesEl.innerHTML = '';
-    addSystemMessage(t('chatConnected'));
+    addSystemMessage(
+      t('chatConnectedWith').replace('{partner}', anonymousName(partnerNumber))
+    );
     setHeaderStatus('connected', 'is-connected');
     messageInput.focus();
   }
@@ -96,11 +182,30 @@
     scrollToBottom();
   }
 
-  function addMessage(text, type) {
-    const el = document.createElement('div');
-    el.className = 'message message--' + type;
-    el.textContent = text;
-    messagesEl.appendChild(el);
+  function addMessage(text, type, authorNumber) {
+    const wrap = document.createElement('div');
+    wrap.className = 'message message--' + type;
+
+    if (type === 'received' && authorNumber !== null && authorNumber !== undefined) {
+      const author = document.createElement('span');
+      author.className = 'message__author';
+      author.textContent = anonymousName(authorNumber);
+      wrap.appendChild(author);
+    }
+
+    if (type === 'sent' && yourNumber !== null) {
+      const author = document.createElement('span');
+      author.className = 'message__author message__author--you';
+      author.textContent = anonymousName(yourNumber);
+      wrap.appendChild(author);
+    }
+
+    const body = document.createElement('span');
+    body.className = 'message__body';
+    body.textContent = text;
+    wrap.appendChild(body);
+
+    messagesEl.appendChild(wrap);
     scrollToBottom();
   }
 
@@ -112,7 +217,9 @@
     socket = io({ transports: ['websocket', 'polling'] });
 
     socket.on('connect', () => {
-      showWaitingUI();
+      if (!isMatched) {
+        showWaitingUI();
+      }
       socket.emit('find-partner');
     });
 
@@ -122,31 +229,49 @@
         return;
       }
       uiState = 'offline';
-      statusText.className = 'status-card__text';
+      document.body.classList.remove('is-waiting', 'is-matched');
+      if (statusPanel) {
+        statusPanel.hidden = false;
+        statusPanel.classList.remove('is-hidden');
+      }
+      if (statusSpinner) statusSpinner.classList.add('is-hidden');
+      if (statusText) {
+        statusText.className = 'status-card__text';
+        statusText.innerHTML = '';
+        statusText.textContent = t('unableConnect');
+      }
       setHeaderStatus('offline', 'is-error');
-      statusText.textContent = t('unableConnect');
-      statusSpinner.classList.add('is-hidden');
     });
 
     socket.on('connect_error', () => {
       uiState = 'offline';
-      statusText.className = 'status-card__text';
+      document.body.classList.remove('is-waiting', 'is-matched');
+      if (statusPanel) {
+        statusPanel.hidden = false;
+        statusPanel.classList.remove('is-hidden');
+      }
+      if (statusSpinner) statusSpinner.classList.add('is-hidden');
+      if (statusText) {
+        statusText.className = 'status-card__text';
+        statusText.innerHTML = '';
+        statusText.textContent = t('serverUnreachable');
+      }
       setHeaderStatus('offline', 'is-error');
-      statusText.textContent = t('serverUnreachable');
-      statusSpinner.classList.add('is-hidden');
     });
 
     socket.on('waiting', () => {
+      if (isMatched) return;
       showWaitingUI();
     });
 
-    socket.on('matched', () => {
-      showChatUI();
+    socket.on('matched', (data) => {
+      showChatUI(data);
     });
 
     socket.on('message', (payload) => {
       if (!payload || !payload.text) return;
-      addMessage(payload.text, 'received');
+      const fromNum = parseMatchNumber(payload.fromNumber);
+      addMessage(payload.text, 'received', fromNum !== null ? fromNum : partnerNumber);
     });
 
     socket.on('partner-disconnected', () => {
@@ -159,19 +284,29 @@
       connectSocket();
       return;
     }
+    isMatched = false;
     showWaitingUI();
     socket.emit('find-partner');
   }
 
   function refreshLang() {
+    if (yourNameEl && yourNumber !== null) {
+      yourNameEl.textContent = anonymousName(yourNumber);
+    }
+    if (partnerNameEl && partnerNumber !== null) {
+      partnerNameEl.textContent = anonymousName(partnerNumber);
+    }
+
     if (uiState === 'waiting') {
       showWaitingUI();
     } else if (uiState === 'disconnected') {
       showDisconnectedUI(disconnectKey);
     } else if (uiState === 'offline') {
       setHeaderStatus('offline', 'is-error');
-      statusText.className = 'status-card__text';
-      statusText.textContent = t('unableConnect');
+      if (statusText) {
+        statusText.className = 'status-card__text';
+        statusText.textContent = t('unableConnect');
+      }
     } else if (uiState === 'matched') {
       setHeaderStatus('connected', 'is-connected');
     } else if (uiState === 'connecting') {

@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="page-chat">
+<body class="page-chat is-waiting">
   <button type="button" class="corner-toggle theme-toggle" data-theme-toggle aria-label="Switch to light mode">
     <span class="corner-toggle__ring" aria-hidden="true"></span>
     <span class="corner-toggle__inner">
@@ -70,6 +70,17 @@
     </section>
 
     <section class="chat-main" id="chatMain" hidden>
+      <div class="chat-identity" id="chatIdentity" hidden>
+        <div class="chat-identity__item">
+          <span class="chat-identity__label" data-i18n="youLabel">You</span>
+          <span class="chat-identity__name" id="yourNameEl">—</span>
+        </div>
+        <div class="chat-identity__divider" aria-hidden="true"></div>
+        <div class="chat-identity__item">
+          <span class="chat-identity__label" data-i18n="partnerLabel">Partner</span>
+          <span class="chat-identity__name" id="partnerNameEl">—</span>
+        </div>
+      </div>
       <div class="messages" id="messages" role="log" aria-live="polite" aria-label="Chat messages"></div>
     </section>
 

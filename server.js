@@ -55,12 +55,49 @@ function cleanupPair(socketId) {
   if (partnerSocket) partnerSocket.leave(pair.roomId);
 }
 
+function generateAnonymousNumber() {
+  return Math.floor(1000 + Math.random() * 9000);
+}
+
+function pairUsers(socket, partnerSocket) {
+  const roomId = `room-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+  const socketNumber = generateAnonymousNumber();
+  let partnerNumber = generateAnonymousNumber();
+  while (partnerNumber === socketNumber) {
+    partnerNumber = generateAnonymousNumber();
+  }
+
+  socket.join(roomId);
+  partnerSocket.join(roomId);
+
+  activePairs.set(socket.id, {
+    partnerId: partnerSocket.id,
+    roomId,
+    yourNumber: socketNumber,
+    partnerNumber,
+  });
+
+  activePairs.set(partnerSocket.id, {
+    partnerId: socket.id,
+    roomId,
+    yourNumber: partnerNumber,
+    partnerNumber: socketNumber,
+  });
+
+  socket.emit('matched', { yourNumber: socketNumber, partnerNumber });
+  partnerSocket.emit('matched', { yourNumber: partnerNumber, partnerNumber: socketNumber });
+}
+
 io.on('connection', (socket) => {
   broadcastOnlineCount();
 
   socket.on('find-partner', () => {
-    if (activePairs.has(socket.id)) {
-      socket.emit('already-connected');
+    const existingPair = activePairs.get(socket.id);
+    if (existingPair && typeof existingPair.yourNumber === 'number') {
+      socket.emit('matched', {
+        yourNumber: existingPair.yourNumber,
+        partnerNumber: existingPair.partnerNumber,
+      });
       return;
     }
 
@@ -73,16 +110,7 @@ io.on('connection', (socket) => {
       const partnerSocket = io.sockets.sockets.get(partnerId);
       if (!partnerSocket) continue;
 
-      const roomId = `room-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-
-      socket.join(roomId);
-      partnerSocket.join(roomId);
-
-      activePairs.set(socket.id, { partnerId, roomId });
-      activePairs.set(partnerId, { partnerId: socket.id, roomId });
-
-      socket.emit('matched');
-      partnerSocket.emit('matched');
+      pairUsers(socket, partnerSocket);
       return;
     }
 
@@ -97,7 +125,10 @@ io.on('connection', (socket) => {
     const trimmed = text.trim();
     if (!trimmed || trimmed.length > 2000) return;
 
-    socket.to(pair.roomId).emit('message', { text: trimmed });
+    socket.to(pair.roomId).emit('message', {
+      text: trimmed,
+      fromNumber: pair.yourNumber,
+    });
   });
 
   socket.on('leave-chat', () => {
