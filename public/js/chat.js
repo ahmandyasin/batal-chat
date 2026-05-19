@@ -344,23 +344,4 @@
   });
 
   connectSocket();
-  console.log('chat.js loaded');
-  // --- NEXT BUTTON CONFIRMATION SYSTEM ---
-let isConfirmingNext = false;
-const nextBtn = document.getElementById('nextBtn')  document.querySelector('.chat-form__next')  document.getElementById('leaveBtn');
-
-if (nextBtn) {
-    nextBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (!isConfirmingNext) {
-            isConfirmingNext = true;
-            nextBtn.textContent = "Sure?";
-            nextBtn.style.backgroundColor = "#e74c3c";
-            nextBtn.style.color = "white";
-        } else {
-            socket.emit('leave-chat');
-            window.location.reload();
-        }
-    });
-}
 })();
