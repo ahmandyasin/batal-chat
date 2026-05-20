@@ -851,6 +851,7 @@ html[lang='ku'] .searching-message {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  flex: 1;
 }
 
 .chat-form__input {
@@ -903,6 +904,39 @@ html[lang='ku'] .searching-message {
 .chat-form__send svg {
   width: 20px;
   height: 20px;
+}
+
+.chat-next-btn {
+  flex-shrink: 0;
+  padding: 0.65rem 1.25rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--btn-primary-text);
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  box-shadow: 0 2px 12px var(--accent-glow);
+  white-space: nowrap;
+}
+
+.chat-next-btn:hover {
+  opacity: 0.92;
+}
+
+.chat-next-btn:active {
+  transform: scale(0.98);
+}
+
+.chat-next-btn.is-confirming {
+  background: var(--danger);
+  box-shadow: 0 2px 12px rgba(248, 113, 113, 0.32);
+}
+
+.chat-next-btn.is-confirming:hover {
+  opacity: 0.92;
 }
 
 @media (min-width: 480px) {

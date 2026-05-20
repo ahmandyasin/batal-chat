@@ -13,6 +13,7 @@
   const chatForm = document.getElementById('chatForm');
   const messageInput = document.getElementById('messageInput');
   const leaveBtn = document.getElementById('leaveBtn');
+  const nextBtn = document.getElementById('nextBtn');
 
   let socket = null;
   let isMatched = false;
@@ -20,6 +21,7 @@
   let disconnectKey = 'partnerLeft';
   let yourNumber = null;
   let partnerNumber = null;
+  let nextBtnConfirming = false;
 
   function t(key) {
     return window.BatalLang ? window.BatalLang.t(key) : key;
@@ -92,6 +94,7 @@
     yourNumber = null;
     partnerNumber = null;
     uiState = 'waiting';
+    nextBtnConfirming = false;
 
     document.body.classList.add('is-waiting');
     document.body.classList.remove('is-matched');
@@ -158,6 +161,7 @@
 
     isMatched = true;
     uiState = 'matched';
+    resetNextBtnState();
 
     hideWaitingUI();
 
@@ -312,6 +316,25 @@
     } else if (uiState === 'connecting') {
       setHeaderStatus('connecting', '');
     }
+
+    updateNextBtnText();
+  }
+
+  function resetNextBtnState() {
+    nextBtnConfirming = false;
+    if (nextBtn) {
+      nextBtn.classList.remove('is-confirming');
+      updateNextBtnText();
+    }
+  }
+
+  function updateNextBtnText() {
+    if (!nextBtn) return;
+    if (nextBtnConfirming) {
+      nextBtn.textContent = t('areYouSure');
+    } else {
+      nextBtn.textContent = t('nextChat');
+    }
   }
 
   window.BatalChat = { refreshLang };
@@ -329,6 +352,36 @@
   });
 
   findAgainBtn.addEventListener('click', findPartner);
+
+  nextBtn.addEventListener('click', () => {
+    if (!isMatched) return;
+
+    if (nextBtnConfirming) {
+      // Second click: confirm and disconnect
+      nextBtnConfirming = false;
+      if (nextBtn) {
+        nextBtn.classList.remove('is-confirming');
+      }
+      if (socket) {
+        socket.emit('leave-chat');
+      }
+      findPartner();
+    } else {
+      // First click: show confirmation
+      nextBtnConfirming = true;
+      if (nextBtn) {
+        nextBtn.classList.add('is-confirming');
+      }
+      updateNextBtnText();
+
+      // Reset confirmation state after 3 seconds if no second click
+      setTimeout(() => {
+        if (nextBtnConfirming && isMatched) {
+          resetNextBtnState();
+        }
+      }, 3000);
+    }
+  });
 
   leaveBtn.addEventListener('click', () => {
     if (socket) {

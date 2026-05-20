@@ -6,7 +6,6 @@
       title: 'Batal',
       privacy: 'Your identity and messages are fully private and protected',
       startChat: 'Start Chat',
-      developer: 'Developer: Ravand Samir',
       online: '{n} online',
       onlineUnknown: '— online',
       pageTitle: 'Batal — Anonymous Chat',
@@ -36,13 +35,14 @@
       leaveChat: 'Leave chat',
       sendMessage: 'Send message',
       messageLabel: 'Message',
+      nextChat: 'Next',
+      areYouSure: 'Are you sure?',
     },
     ku: {
       title: 'Batal',
       privacy: 'ناسنامە و نامەیێن تە ب تەمامی د پاراستی نە و تایبەتن',
       startChat: 'دەست پێ کرنا چاتی',
       searchingForPartner: 'ل لێگەڕیانا کەسەکی بوو چاتی...',
-      developer: 'گەشەپێدەر: ڕەڤەند سەمیر',
       online: '{n} سەر هێل',
       onlineUnknown: '— سەر هێل',
       pageTitle: 'Batal — چاتێ نەناس',
@@ -71,6 +71,8 @@
       leaveChat: 'جێهێلنا چاتێ',
       sendMessage: 'شاندنا نامەی',
       messageLabel: 'نامە',
+      nextChat: 'داهاتو',
+      areYouSure: 'تۆ بڕیار دا؟',
     },
   };
 
